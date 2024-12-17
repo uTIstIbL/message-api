@@ -6,6 +6,7 @@ const cluster = require('cluster');
 const numCPUs = require('os').cpus().length
 const mongoose = require("mongoose");
 const { config } = require('dotenv')
+const URI = "mongodb+srv://messengerAdmin:messengerAdmin@message-api.qx3ni.mongodb.net/?retryWrites=true&w=majority&appName=message-api"
 
 // import package.json
 const pkg = require('./package.json')
@@ -27,7 +28,9 @@ if(!cluster.isMaster){
 } else {
 async function run() {
     try {
-      await mongoose.connect("mongodb+srv://messengerAdmin:messengerAdmin@message-api.qx3ni.mongodb.net/?retryWrites=true&w=majority&appName=message-api");
+      await mongoose.connect(URI,{
+        dbName: 'message'
+      });
       console.log("資料庫連線成功");
     } catch (error) {
       
@@ -38,6 +41,7 @@ async function run() {
   
   
   // 中介軟體使用
+  app.use(express.json());
   app.use(morgan('Aaron'))
   app.use(morgan(':method :url :response-time'));
   
