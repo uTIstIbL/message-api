@@ -102,12 +102,32 @@ router.post('/onlinestatus', async (req, res) => {
     }
 })
 
-// 更新上線狀態
+// 更新為線下狀態
 router.put('/onlinestatus/:id', async (req,res) => {
     try {
+      const findStatus = await Status.findById().exec();
 
+      // 判斷是否為線下狀態
+      if( findStatus === -1 ){
+        return res.status(401).json({
+            status: 401,
+            data: {
+              error: "操作失敗: 您已經為線下狀態"
+            }
+        })
+      }else{
+        const updateStatus = { status: req.body.status }
+
+        await Status.updateOne(updateStatus)
+  
+        return res.status(200).json({
+              status: 200,
+              data: {
+                  status: req.body.status                
+              }
+        })
+      } 
     } catch (error) {
-        console.error(error)
         return res.status(500).json({
             status: 500,
             data:{
