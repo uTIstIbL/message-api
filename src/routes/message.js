@@ -53,7 +53,8 @@ router.post('/', async (req,res) => {
 })
 
 router.post('/onetomore', (req,res) => {
-    try { 
+    try {
+    // 一對多群組聊天室 
                 
     } catch (error) {
         return res.status(500).json({
@@ -105,28 +106,41 @@ router.post('/onlinestatus', async (req, res) => {
 // 更新為線下狀態
 router.put('/onlinestatus/:id', async (req,res) => {
     try {
-      const findStatus = await Status.findById().exec();
+      const findStatus = await Status.findOne({ _id: undefined });
 
       // 判斷是否為線下狀態
-      if( findStatus === -1 ){
-        return res.status(401).json({
-            status: 401,
+      if( !findStatus || findStatus !== -1 ){
+        const updateStatus = { status: req.body.status }
+
+        const statusUpdate = await Status.updateOne(
+            { status: req.body.status }
+        )
+    
+        return res.status(200).json({
+            status: 200,
             data: {
-              error: "操作失敗: 您已經為線下狀態"
+                updateStatus             
+            }
+        })
+      }else if(findStatus !== 1){
+        //  從線下狀態再一次調整為上線狀態
+        const updateOnlineStatue = await Status.updateOne({ status: req.body.status }) 
+              
+
+        return res.status(200).json({
+            status: 200,
+            data:{
+                status: updateOnlineStatue
             }
         })
       }else{
-        const updateStatus = { status: req.body.status }
-
-        await Status.updateOne(updateStatus)
-  
-        return res.status(200).json({
-              status: 200,
-              data: {
-                  status: req.body.status                
-              }
+        return res.status(401).json({
+            status: 401,
+            data:{
+                error: "操作失敗: 伺服器驗證失敗"
+            }
         })
-      } 
+      }      
     } catch (error) {
         return res.status(500).json({
             status: 500,
