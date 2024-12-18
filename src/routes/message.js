@@ -4,6 +4,7 @@ const router = express.Router();
 // import db
 const Messenger = require('../models/message')
 const Status = require('../models/status');
+const Group = require('../models/12more')
 
 
 router.get('/', async (req,res) => {
@@ -52,11 +53,26 @@ router.post('/', async (req,res) => {
     
 })
 
-router.post('/onetomore', (req,res) => {
+router.post('/onetomore', async (req,res) => {
     try {
     // 一對多群組聊天室 
-                
+    const sendGroupMessage = {
+        name: req.body.name,
+        members: req.body.members
+    }
+
+    const groupID = await Group.create( sendGroupMessage )
+
+    const messages = [groupID];
+
+    return res.status(200).json({
+        status:200,
+        data:{
+            message: messages
+        }
+    })
     } catch (error) {
+        console.error(error)
         return res.status(500).json({
             status: 500,
             data:{
@@ -64,6 +80,27 @@ router.post('/onetomore', (req,res) => {
             }
         })
     }
+})
+
+router.get('/onetomore', async (req,res) => {
+    const findMessageGroup = await Group.find()
+
+    // 判斷找不到的到資料
+    if(!findMessageGroup){
+        return res.status(404).json({
+            status: 404,
+            data:{
+                error:"操作失敗: 伺服器找不到資料"
+            }
+        })
+    }
+
+    return res.status(200).json({
+        status: 200,
+        data:{
+            findMessageGroup
+        }
+    })
 })
 
 // 調整為上線狀態
